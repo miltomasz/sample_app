@@ -11,7 +11,11 @@ describe "Authentication" do
   end
 
   describe "signin" do
+    let(:user) { FactoryGirl.create(:user) }
     before { visit signin_path }
+
+    it { should_not have_link('Profile', href: user_path(user)) }
+    it { should_not have_link('Settings', href: edit_user_path(user)) }
 
     describe "with invalid information" do
       before { click_button "Sign in" }
@@ -26,18 +30,12 @@ describe "Authentication" do
     end
 
     describe "with valid information" do
-      let(:user) { FactoryGirl.create(:user) }
       before do
         valid_signin(user)
       end
 
-<<<<<<< HEAD
       it { should have_title_tag(user.name) }
-=======
-      it { should have_selector('title', text: user.name) }
-
       it { should have_link('Users',    href: users_path) }
->>>>>>> updating-users
       it { should have_link('Profile', href: user_path(user)) }
       it { should have_link('Settings', href: edit_user_path(user)) }
       it { should have_link('Sign out', href: signout_path) }
@@ -88,6 +86,19 @@ describe "Authentication" do
           it "should render the desired protected page" do
             page.should have_selector('title', text: 'Edit user')
           end
+
+          describe "when signing in again" do
+            before do
+              visit signin_path
+              fill_in "Email",    with: user.email
+              fill_in "Password", with: user.password
+              click_button "Sign in"
+            end
+
+            it "should render the default (profile) page" do
+              page.should have_selector('title', text: user.name) 
+            end
+          end
         end
       end
     end
@@ -117,6 +128,20 @@ describe "Authentication" do
       describe "submitting a DELETE request to the Users#destroy action" do
         before { delete user_path(user) }
         specify { response.should redirect_to(root_path) }        
+      end
+    end
+
+    describe "as admin user" do
+      let(:admin) { FactoryGirl.create(:admin) }
+      let(:all_users_count) { User.all.count }
+
+      before { sign_in admin }
+
+      describe "submitting a DELETE request to the Admin#destroy action" do
+        before { delete user_path(admin) }
+
+        specify { User.all.count.should == all_users_count }
+        specify { response.should redirect_to(users_path) }        
       end
     end
   end
