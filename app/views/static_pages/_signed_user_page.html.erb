@@ -1,0 +1,15 @@
+<div class="row">
+  <aside class="span4">
+    <section>
+      <%= render 'shared/user_info' %>
+    </section>
+    <section>
+      <%= render partial: 'shared/micropost_form', locals: { micropost: micropost } %>
+    </section>
+  </aside>
+
+  <div class="span8">
+    <h3>Micropost Feed</h3>
+    <%= render partial: 'shared/feed', locals: { feed_items: feed_items } %>
+  </div>
+</div>  

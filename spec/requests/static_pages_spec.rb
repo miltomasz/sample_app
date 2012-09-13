@@ -15,7 +15,6 @@ describe "Static pages" do
     let(:page_title) { '' }
 
     it_should_behave_like "all static pages"
-    it_should_behave_like "all static pages"
     it { should_not have_selector('title', :text => '| Home') }
 
     describe "for signed-in users" do
@@ -30,6 +29,25 @@ describe "Static pages" do
       it "should render the user's feed" do
         user.feed.each do |item|
           page.should have_selector("li##{item.id}", text: item.content)
+        end
+      end
+
+      describe "for multiple microposts" do
+        it "should display plural form" do
+          page.should have_selector('span', text: '2 microposts')
+        end
+      end
+
+      describe "for one micropost" do
+        let(:user_with_one_micropost) { FactoryGirl.create(:user) }
+        before do
+          FactoryGirl.create(:micropost, user: user_with_one_micropost, content: "Lorem ipsum")
+          sign_in user_with_one_micropost
+          visit root_path
+        end
+
+        it "should display singular form" do
+          page.should have_selector('span', text: '1 micropost')
         end
       end
     end
