@@ -199,6 +199,39 @@ describe User do
     end
   end
 
+  describe "relationships associations" do
+
+    let(:follower) { FactoryGirl.create(:user) }
+    let(:followed) { FactoryGirl.create(:user) }
+    let(:relationship) { follower.relationships.build(followed_id: followed.id) }
+
+    it "should destroy associated relationships" do
+      relationships = follower.relationships
+      follower.destroy
+
+      relationships.each do |relationship|
+        Relationship.find_by_id(relationship.id).should be_nil
+      end
+    end
+  end
+
+  describe "reverse relationships associations" do
+
+    let(:follower) { FactoryGirl.create(:user) }
+    let(:followed) { FactoryGirl.create(:user) }
+    let(:reverse_relationship) { follower.reverse_relationships.build(followed_id: followed.id) }
+
+    it "should destroy associated reverse relationships" do
+      reverse_relationships = follower.reverse_relationships
+      follower.destroy
+
+      reverse_relationships.each do |relationship|
+        Relationship.find_by_id(relationship.id).should be_nil
+      end
+    end
+  end
+
+
   describe "following" do
     let(:other_user) { FactoryGirl.create(:user) }    
     before do

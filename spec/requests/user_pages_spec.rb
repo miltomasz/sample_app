@@ -58,10 +58,33 @@ describe "User Pages" do
 
   describe "profile page" do
 	  let(:user) { FactoryGirl.create(:user) }
-	  before { visit user_path(user) }
+
+    before do
+      FactoryGirl.create(:micropost, user: user, content: "Lorem")
+      FactoryGirl.create(:micropost, user: user, content: "Ipsum")
+      sign_in user
+      visit user_path(user)
+    end
 
 	  it { should have_selector('h1',    text: user.name) }
 	  it { should have_selector('title', text: user.name) }
+
+    it "should render the user's feed" do
+      user.feed.each do |item|
+        page.should have_selector('span', text: item.content)
+      end
+    end
+
+    describe "follower/following counts" do
+      let(:other_user) { FactoryGirl.create(:user) }
+      before do
+        other_user.follow!(user)
+        visit user_path(user)
+      end
+
+      it { should have_link("0 following", href: following_user_path(user)) }
+      it { should have_link("1 followers", href: followers_user_path(user)) }
+    end
 	end
 
   describe "signup" do
